@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from meta_ai_api import MetaAI
-import os
+# import os
 
 app = Flask(__name__, static_folder='')
 CORS(app)  # Enable CORS for all routes

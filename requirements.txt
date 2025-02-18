@@ -1,4 +1,3 @@
-flask
-flask_cors
-meta_ai_api
-os
+flask==3.1.0
+flask_cors==5.0.0
+meta_ai_api==1.2.5
