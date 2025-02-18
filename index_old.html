@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant by Akash</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3a7bc8;
+            --secondary-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --border-color: #34495e;
+            --background-color: #1a1a1a;
+            --message-background: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-toggle {  
+          display: none;  
+        }
+        .navbar-tools {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .tool-btn {
+            background-color: transparent;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .tool-btn:hover {
+            background-color: var(--text-color);
+            color: var(--secondary-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 80px auto 20px;
+            padding: 2rem;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        #prompt-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            resize: vertical;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        #send-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+
+        #send-btn:hover {
+            background-color: #2980b9;
+        }
+
+        #message-box {
+            margin-top: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 1rem;
+        }
+
+        .message {
+            background-color: var(--message-background);
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .message .delete-btn,
+        .message .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .message .delete-btn {
+            right: 0.5rem;
+        }
+
+        .message .copy-btn {
+            right: 2.5rem;
+        }
+
+        .spinner {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-color);
+        }
+
+        .sources {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .sources a {
+            display: block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+        }
+
+        .sources a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        footer a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 60px 1rem 20px;
+                padding: 1rem;
+            }
+
+            .navbar-tools {
+                display: none;
+            }
+
+            .navbar-tools.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background-color: var(--secondary-color);
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: var(--text-color);
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand"><img src="https://www.skytup.com/asset/icons/sky-50x50.png" alt=""
+                style="width: 35px;height: 35px;background: azure;border-radius: 50%;box-shadow: 0 0 5px;margin: 5px;padding: 2px;">
+            Skytup Ai</div>
+        <button class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="navbar-tools" id="navbar-tools">
+            <button class="tool-btn" id="clear-btn">Clear Messages</button>
+            <button class="tool-btn" id="save-btn">Save Conversation</button>
+            <button class="tool-btn" id="load-btn">Load Conversation</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <textarea id="prompt-input" rows="4" placeholder="Enter your prompt here..."></textarea>
+        <button id="send-btn">Send</button>
+        <div class="spinner">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+        </div>
+        <div id="message-box"></div>
+    </div>
+
+    <footer>
+        <a href="https://www.skytup.com" target="_blank">www.skytup.com</a>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const messageBox = $('#message-box');
+            const promptInput = $('#prompt-input');
+            const sendBtn = $('#send-btn');
+            const spinner = $('.spinner');
+            const clearBtn = $('#clear-btn');
+            const saveBtn = $('#save-btn');
+            const loadBtn = $('#load-btn');
+            const menuToggle = $('#menu-toggle');
+            const navbarTools = $('#navbar-tools');
+
+            function addMessage(content, sources = null) {
+                const message = $('<div class="message"></div>').html(content);
+                const deleteBtn = $('<button class="delete-btn"><i class="fas fa-times"></i></button>');
+                const copyBtn = $('<button class="copy-btn"><i class="fas fa-copy"></i></button>');
+                message.append(deleteBtn, copyBtn);
+
+                if (sources) {
+                    const sourcesDiv = $('<div class="sources"></div>');
+                    sources.forEach(source => {
+                        const link = $('<a></a>')
+                            .attr('href', source.link)
+                            .attr('target', '_blank')
+                            .text(source.title);
+                        sourcesDiv.append(link);
+                    });
+                    message.append(sourcesDiv);
+                }
+
+                messageBox.append(message);
+                messageBox.scrollTop(messageBox[0].scrollHeight);
+
+                deleteBtn.on('click', function () {
+                    message.remove();
+                    saveMessages();
+                });
+
+                copyBtn.on('click', function () {
+                    const textToCopy = message.clone().children().remove().end().text();
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        alert('Message copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+                });
+            }
+
+            function saveMessages() {
+                const messages = [];
+                $('.message').each(function () {
+                    messages.push($(this).html());
+                });
+                localStorage.setItem('aiMessages', JSON.stringify(messages));
+            }
+
+            function loadMessages() {
+                const messages = JSON.parse(localStorage.getItem('aiMessages')) || [];
+                messageBox.empty();
+                messages.forEach(message => {
+                    const messageElement = $('<div class="message"></div>').html(message);
+                    messageBox.append(messageElement);
+                    messageElement.find('.delete-btn').on('click', function () {
+                        messageElement.remove();
+                        saveMessages();
+                    });
+                    messageElement.find('.copy-btn').on('click', function () {
+                        const textToCopy = messageElement.clone().children().remove().end().text();
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            alert('Message copied to clipboard!');
+                        }).catch(err => {
+                            console.error('Failed to copy text: ', err);
+                        });
+                    });
+                });
+            }
+
+            async function sendPrompt() {
+                const prompt = promptInput.val().trim();
+                if (prompt) {
+                    addMessage('You: ' + prompt);
+                    promptInput.val('');
+                    spinner.show();
+
+                    try {
+                        const response = await fetch('/api/prompt', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ message: prompt })
+                        });
+                        const data = await response.json();
+
+                        spinner.hide();
+                        addMessage('AI: ' + data.message, data.sources);
+                        saveMessages();
+                    } catch (error) {
+                        console.error('Error:', error);
+                        spinner.hide();
+                        addMessage('AI: Sorry, there was an error processing your request.');
+                    }
+                }
+            }
+
+            sendBtn.on('click', sendPrompt);
+
+            promptInput.on('keypress', function (e) {
+                if (e.which === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    sendPrompt();
+                }
+            });
+
+            clearBtn.on('click', function () {
+                messageBox.empty();
+                localStorage.removeItem('aiMessages');
+            });
+
+            saveBtn.on('click', saveMessages);
+            loadBtn.on('click', loadMessages);
+
+            menuToggle.on('click', function () {
+                navbarTools.toggleClass('active');
+            });
+
+            // Load saved messages on page load
+            loadMessages();
+        });
+    </script>
+</body>
+
+</html>
